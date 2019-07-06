@@ -10,16 +10,19 @@ cc_library(
         "src/monitor.c",
         "src/vulkan.c",
         "src/window.c",
-    ] + select({
-        "@bazel_tools//src/conditions:windows": glob(["src/win32_*.c", "src/wgl_*.c", "src/egl_*.c", "src/osmesa_*.c"]),
-        "//conditions:default": [],
+    ] + glob([
+        "src/egl_*.c",
+        "src/osmesa_*.c"
+    ]) + select({
+        "@bazel_tools//src/conditions:windows": glob(["src/win32_*.c", "src/wgl_*.c"]),
+        "//conditions:default": glob(["src/x11_*.c", "src/xkb_*.c", "src/glx_*.c", "src/linux_*.c", "src/posix_*.c"]),
     }),
 
-    hdrs = glob(["src/*.h"]),
+    hdrs = glob(["src/*.h", "include/**/*.h"]),
 
     defines = [ ] + select({
         "@bazel_tools//src/conditions:windows": ["_GLFW_WIN32"],
-        "//conditions:default": [],
+        "//conditions:default": ["_GLFW_X11"],
     }),
 
     includes = [
@@ -30,8 +33,12 @@ cc_library(
         "@bazel_tools//src/conditions:windows": [
             "-DEFAULTLIB:user32.lib",
             "-DEFAULTLIB:shell32.lib",
-            "-DEFAULTLIB:gdi32.lib"
+            "-DEFAULTLIB:gdi32.lib",
         ],
-        "//conditions:default": [],
+        "//conditions:default": [
+            "-ldl",
+            "-lpthread",
+            "-lX11",
+        ],
     }),
 )
