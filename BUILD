@@ -1,4 +1,3 @@
-
 cc_library(
     name = "glfw",
     visibility = ["//visibility:public"],
@@ -15,6 +14,7 @@ cc_library(
         "src/osmesa_*.c"
     ]) + select({
         "@bazel_tools//src/conditions:windows": glob(["src/win32_*.c", "src/wgl_*.c"]),
+        "@bazel_tools//src/conditions:darwin": glob(["src/cocoa*.c"]),
         "//conditions:default": glob(["src/x11_*.c", "src/xkb_*.c", "src/glx_*.c", "src/linux_*.c", "src/posix_*.c"]),
     }),
 
@@ -22,6 +22,7 @@ cc_library(
 
     defines = [ ] + select({
         "@bazel_tools//src/conditions:windows": ["_GLFW_WIN32"],
+        "@bazel_tools//src/conditions:darwin": ["_GLFW_COCOA"],
         "//conditions:default": ["_GLFW_X11"],
     }),
 
@@ -34,6 +35,9 @@ cc_library(
             "-DEFAULTLIB:user32.lib",
             "-DEFAULTLIB:shell32.lib",
             "-DEFAULTLIB:gdi32.lib",
+        ],
+        "@bazel_tools//src/conditions:darwin": [
+            
         ],
         "//conditions:default": [
             "-ldl",
